@@ -1,4 +1,4 @@
-import { Store } from './components/ui/Store';
+import { Store } from './components/store';
 import '../styles/index.css';
 
 export default function App() {
