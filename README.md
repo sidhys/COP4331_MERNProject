@@ -1,2 +1,2 @@
 # COP4331_MERNProject
-Citrus game marketplace
+Base branch that project started on
