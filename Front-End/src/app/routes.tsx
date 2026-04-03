@@ -1,9 +1,9 @@
 import { createBrowserRouter } from "react-router";
-import { Root } from "./components/ui/root.tsx";
-import { Store } from "./components/ui/store.tsx";
-import { SignUp } from "./components/ui/signUp.tsx";
-import { VerifyEmail } from "./components/ui/verifyEmail.tsx";
-import { Login } from "./components/ui/login";
+import { Root } from "./components/root.tsx";
+import { Store } from "./components/store.tsx";
+import { SignUp } from "./components/usignUp.tsx";
+import { VerifyEmail } from "./components/verifyEmail.tsx";
+import { Login } from "./components/login";
 
 export const router = createBrowserRouter([
   {
