@@ -29,7 +29,7 @@ export function SignUp() {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/signup", {
+      const response = await fetch("/api/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -50,6 +50,7 @@ export function SignUp() {
       setError("Could not connect to server");
     }
   };
+  
 
   return (
     <div className="min-h-screen bg-black text-white flex items-center justify-center p-4">
