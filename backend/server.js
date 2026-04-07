@@ -164,7 +164,7 @@ app.post('/api/addcard', async (req, res, next) => {
   res.status(200).json(ret);
 });
 
-app.post('/api/login', async (req, res) => {
+app.post('/api/signup', async (req, res) => {
   try {
     const { email, password } = req.body;
 
