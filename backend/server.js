@@ -120,7 +120,7 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('Successfully connected to MongoDB!'))
   .catch((err) => console.log('MongoDB connection error: ', err));
 
-app.post('/api/signup', async (req, res) => {
+app.post(['/api/signup', '/signup'], async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
@@ -164,7 +164,7 @@ app.post('/api/addcard', async (req, res, next) => {
   res.status(200).json(ret);
 });
 
-app.post('/api/signup', async (req, res) => {
+app.post(['/api/login', '/login'], async (req, res) => {
   try {
     const { email, password } = req.body;
 
