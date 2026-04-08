@@ -142,7 +142,7 @@ app.get('/api/games/:id', async (req, res) => {
   }
 });
 
-app.post('/api/signup', async (req, res) => {
+app.post(['/api/signup', '/signup'], async (req, res) => {
   const { username, email, password } = req.body;
 
   if (!username || !email || !password) {
@@ -164,7 +164,7 @@ app.post('/api/signup', async (req, res) => {
   }
 });
 
-app.post('/api/login', async (req, res) => {
+app.post(['/api/login', '/login'], async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
