@@ -114,7 +114,7 @@ var cardList =
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use('/api/auth', authRoutes);
+app.use(['/api/auth', '/auth'], authRoutes);
 
 app.get('/api/ping', async (req, res) => {
   res.status(200).json({ message: 'Hello World' });
