@@ -205,16 +205,6 @@ app.post('/api/resend-verification', async (req, res) => {
   }
 });
 
-app.post('/api/addcard', async (req, res, next) => {
-  var error = '';
-  const { userId, card } = req.body;
-
-  cardList.push(card);
-
-  var ret = { error: error };
-  res.status(200).json(ret);
-});
-
 app.post(['/api/login', '/login'], async (req, res) => {
   try {
     const { email, password } = req.body;

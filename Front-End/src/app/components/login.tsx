@@ -95,7 +95,7 @@ export function Login() {
               </div>
             </div>
 
-            {/* Password */}
+            {/*  */}
             <div>
               <label className="block text-sm font-medium mb-2 text-slate-300">
                 Password
@@ -116,6 +116,7 @@ export function Login() {
             <div className="flex justify-end">
               <button
                 type="button"
+                onClick={() => navigate("/forgot-password")}
                 className="text-sm text-orange-400 hover:text-orange-300 transition-colors"
               >
                 Forgot password?

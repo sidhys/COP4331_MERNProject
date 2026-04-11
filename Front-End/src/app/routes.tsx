@@ -9,6 +9,7 @@ import { Community } from "./components/community.tsx";
 import { Cart } from "./components/cart.tsx";
 import { Profile } from "./components/profile.tsx";
 import { GameDetails } from "./components/gameDetails.tsx";
+import { ForgotPassword } from "./components/forgotPassword.tsx";
 
 export const router = createBrowserRouter([
   {
@@ -24,6 +25,7 @@ export const router = createBrowserRouter([
       { path: "cart", Component: Cart },
       { path: "profile", Component: Profile },
       { path: "game/:id", Component: GameDetails },
+      { path: "forgot-password", Component: ForgotPassword },
     ],
   },
 ]);
