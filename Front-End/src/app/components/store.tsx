@@ -1,19 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { ShoppingCart, User, Star, Tag, Search, SlidersHorizontal } from "lucide-react";
+import { ShoppingCart, User, Star, Tag, Search } from "lucide-react";
 import { clearStoredUser, useStoredUser } from "../lib/authStorage";
 import { getGameDiscountPercentage, getGameGenre, isNewRelease } from "../lib/gameUtils";
 import { useCart } from "./cartContext";
 import { useGames } from "./gamesContext";
 import { useLibrary } from "./libraryContext";
-
-const priceFilterOptions = [
-  { value: "all", label: "All Prices" },
-  { value: "free", label: "Free" },
-  { value: "under-20", label: "Under $20" },
-  { value: "20-40", label: "$20 to $40" },
-  { value: "40-plus", label: "$40+" },
-];
 
 export function Store() {
   const navigate = useNavigate();
@@ -23,24 +15,9 @@ export function Store() {
   const user = useStoredUser();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
-  const [selectedGenre, setSelectedGenre] = useState("all");
-  const [selectedTag, setSelectedTag] = useState("all");
-  const [selectedPrice, setSelectedPrice] = useState("all");
+
 
   const featuredGame = [...games].sort((a, b) => (b.rating || 0) - (a.rating || 0))[0];
-
-  const genreOptions = Array.from(
-    new Set(
-      games.flatMap((game) => {
-        const values = [game.genre, ...(game.genres || [])];
-        return values.filter((value): value is string => Boolean(value));
-      }),
-    ),
-  ).sort((a, b) => a.localeCompare(b));
-
-  const tagOptions = Array.from(
-    new Set(games.flatMap((game) => game.tags)),
-  ).sort((a, b) => a.localeCompare(b));
 
   const handleLogout = () => {
     clearStoredUser();
@@ -61,30 +38,6 @@ export function Store() {
     addToCart(gameId);
   };
 
-  const matchesPriceFilter = (price: number) => {
-    if (selectedPrice === "all") {
-      return true;
-    }
-
-    if (selectedPrice === "free") {
-      return price === 0;
-    }
-
-    if (selectedPrice === "under-20") {
-      return price < 20;
-    }
-
-    if (selectedPrice === "20-40") {
-      return price >= 20 && price <= 40;
-    }
-
-    if (selectedPrice === "40-plus") {
-      return price > 40;
-    }
-
-    return true;
-  };
-
   const filteredGames = games.filter((game) => {
     const query = searchQuery.trim().toLowerCase();
     const genre = getGameGenre(game);
@@ -100,21 +53,9 @@ export function Store() {
       (activeFilter === "sale" && !!game.originalPrice) ||
       (activeFilter === "new" && isNewRelease(game));
 
-    const matchesGenre =
-      selectedGenre === "all" ||
-      genre === selectedGenre ||
-      (game.genres || []).includes(selectedGenre);
-
-    const matchesTag =
-      selectedTag === "all" ||
-      game.tags.includes(selectedTag);
-
     return (
       matchesSearch &&
-      matchesQuickFilter &&
-      matchesGenre &&
-      matchesTag &&
-      matchesPriceFilter(game.price)
+      matchesQuickFilter
     );
   });
 
@@ -281,77 +222,6 @@ export function Store() {
                 {filter.label}
               </button>
             ))}
-          </div>
-        </div>
-
-        <div className="mb-8 rounded-2xl border border-slate-800 bg-slate-950/70 p-5">
-          <div className="mb-4 flex items-center gap-2 text-sm uppercase tracking-[0.25em] text-slate-400">
-            <SlidersHorizontal className="h-4 w-4" />
-            Browse Filters
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <label className="block">
-              <span className="mb-2 block text-sm text-slate-300">Genre</span>
-              <select
-                value={selectedGenre}
-                onChange={(e) => setSelectedGenre(e.target.value)}
-                className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-3 text-sm text-white focus:border-orange-500 focus:outline-none"
-              >
-                <option value="all">All Genres</option>
-                {genreOptions.map((genre) => (
-                  <option key={genre} value={genre}>
-                    {genre}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="block">
-              <span className="mb-2 block text-sm text-slate-300">Tag</span>
-              <select
-                value={selectedTag}
-                onChange={(e) => setSelectedTag(e.target.value)}
-                className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-3 text-sm text-white focus:border-orange-500 focus:outline-none"
-              >
-                <option value="all">All Tags</option>
-                {tagOptions.map((tag) => (
-                  <option key={tag} value={tag}>
-                    {tag}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="block">
-              <span className="mb-2 block text-sm text-slate-300">Price</span>
-              <select
-                value={selectedPrice}
-                onChange={(e) => setSelectedPrice(e.target.value)}
-                className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-3 text-sm text-white focus:border-orange-500 focus:outline-none"
-              >
-                {priceFilterOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <div className="flex items-end">
-              <button
-                onClick={() => {
-                  setSearchQuery("");
-                  setSelectedGenre("all");
-                  setSelectedTag("all");
-                  setSelectedPrice("all");
-                  setActiveFilter("all");
-                }}
-                className="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-3 text-sm transition-colors hover:bg-slate-800"
-              >
-                Clear Filters
-              </button>
-            </div>
           </div>
         </div>
 
