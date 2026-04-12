@@ -4,85 +4,32 @@ import { ArrowLeft, ShoppingCart, Trash2, Plus, Minus } from "lucide-react";
 import { useStoredUser } from "../lib/authStorage";
 import { getGameGenre } from "../lib/gameUtils";
 import { useCart } from "./cartContext";
-import { useGames } from "./gamesContext";
-import { useLibrary } from "./libraryContext";
 
 export function Cart() {
-  const navigate = useNavigate();
-  const user = useStoredUser();
-  const { isLoading: areGamesLoading } = useGames();
-  const {
-    cart,
-    removeFromCart,
-    updateQuantity,
-    clearCart,
-    getCartTotal,
-    getCartItemCount,
-  } = useCart();
-  const { addGamesToLibrary, isLoading: isLibraryLoading } = useLibrary();
-  const [checkoutError, setCheckoutError] = useState("");
+    const navigate = useNavigate();
+    const {
+        cart,
+        removeFromCart,
+        updateQuantity,
+        clearCart,
+        getCartTotal,
+        getCartItemCount,
+    } = useCart();
 
-  useEffect(() => {
-    if (!user) {
-      navigate("/login");
-    }
-  }, [navigate, user]);
+    useEffect(() => {
+        const storedUser = localStorage.getItem("user_data");
 
-  const handleCheckout = async () => {
-    setCheckoutError("");
+        if (!storedUser) {
+            navigate("/login");
+        }
+    }, [navigate]);
 
-    const gameIds = cart.map((item) => item.game.id);
-    const didSave = await addGamesToLibrary(gameIds);
-
-    if (!didSave) {
-      setCheckoutError("Could not update your library. Please try again.");
-      return;
-    }
-
-    clearCart();
-    navigate("/library");
-  };
-
-  const isWaitingOnCatalog = areGamesLoading && getCartItemCount() > 0 && cart.length === 0;
-
-  return (
-    <div className="min-h-screen bg-black text-white">
-      <div className="mx-auto max-w-6xl px-6 py-8">
-        <button
-          onClick={() => navigate("/")}
-          className="mb-6 flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 transition-colors hover:bg-slate-800"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Store
-        </button>
-
-        <div className="mb-8 flex items-center gap-3">
-          <ShoppingCart className="h-8 w-8 text-orange-400" />
-          <h1 className="text-4xl font-bold">Your Cart</h1>
-        </div>
-
-        {isWaitingOnCatalog ? (
-          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-10 text-center text-slate-300">
-            Loading cart items...
-          </div>
-        ) : cart.length === 0 ? (
-          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-10 text-center">
-            <h2 className="mb-3 text-2xl font-semibold">Your cart is empty</h2>
-            <p className="mb-6 text-slate-400">Add some games from the store to get started.</p>
-            <button
-              onClick={() => navigate("/")}
-              className="rounded-lg bg-orange-600 px-6 py-3 transition-colors hover:bg-orange-700"
-            >
-              Browse Games
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-            <div className="space-y-4 lg:col-span-2">
-              {cart.map((item) => (
-                <div
-                  key={item.game.id}
-                  className="flex flex-col gap-4 rounded-2xl border border-slate-800 bg-slate-900 p-4 md:flex-row"
+    return (
+        <div className="min-h-screen bg-black text-white">
+            <div className="max-w-6xl mx-auto px-6 py-8">
+                <button
+                    onClick={() => navigate("/")}
+                    className="mb-6 flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded-lg transition-colors"
                 >
                   <img
                     src={item.game.imageUrl || ""}
@@ -134,48 +81,97 @@ export function Cart() {
                         </button>
                       </div>
                     </div>
-                  </div>
-                </div>
-              ))}
+                ) : (
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div className="lg:col-span-2 space-y-4">
+                            {cart.map((item) => (
+                                <div
+                                    key={item.game.id}
+                                    className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row gap-4"
+                                >
+                                    <img
+                                        src={item.game.imageUrl}
+                                        alt={item.game.title}
+                                        className="w-full md:w-56 h-36 object-cover rounded-xl"
+                                    />
+
+                                    <div className="flex-1 flex flex-col justify-between">
+                                        <div>
+                                            <h2 className="text-2xl font-semibold mb-2">{item.game.title}</h2>
+                                            <p className="text-slate-400 mb-2">{item.game.genre}</p>
+                                            <p className="text-slate-300 text-sm">{item.game.description}</p>
+                                        </div>
+
+                                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-4">
+                                            <div className="flex items-center gap-3">
+                                                <button
+                                                    onClick={() => updateQuantity(item.game.id, item.quantity - 1)}
+                                                    className="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors"
+                                                >
+                                                    <Minus className="w-4 h-4" />
+                                                </button>
+
+                                                <span className="text-lg font-medium w-8 text-center">
+                                                    {item.quantity}
+                                                </span>
+
+                                                <button
+                                                    onClick={() => updateQuantity(item.game.id, item.quantity + 1)}
+                                                    className="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors"
+                                                >
+                                                    <Plus className="w-4 h-4" />
+                                                </button>
+                                            </div>
+
+                                            <div className="flex items-center gap-4">
+                                                <span className="text-2xl font-bold text-orange-400">
+                                                    ${(item.game.price * item.quantity).toFixed(2)}
+                                                </span>
+
+                                                <button
+                                                    onClick={() => removeFromCart(item.game.id)}
+                                                    className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                    Remove
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 h-fit">
+                            <h2 className="text-2xl font-semibold mb-6">Order Summary</h2>
+
+                            <div className="flex justify-between text-slate-300 mb-3">
+                                <span>Items</span>
+                                <span>{getCartItemCount()}</span>
+                            </div>
+
+                            <div className="flex justify-between text-xl font-bold mb-6">
+                                <span>Total</span>
+                                <span className="text-orange-400">${getCartTotal().toFixed(2)}</span>
+                            </div>
+
+                            <button
+                                onClick={() => navigate("/checkout")}
+                                className="w-full py-3 bg-orange-600 hover:bg-orange-700 rounded-lg transition-colors font-medium mb-3"
+                            >
+                                Proceed to Checkout
+                            </button>
+
+                            <button
+                                onClick={clearCart}
+                                className="w-full py-3 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors font-medium"
+                            >
+                                Clear Cart
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
-
-            <div className="h-fit rounded-2xl border border-slate-800 bg-slate-900 p-6">
-              <h2 className="mb-6 text-2xl font-semibold">Order Summary</h2>
-
-              <div className="mb-3 flex justify-between text-slate-300">
-                <span>Items</span>
-                <span>{getCartItemCount()}</span>
-              </div>
-
-              <div className="mb-6 flex justify-between text-xl font-bold">
-                <span>Total</span>
-                <span className="text-orange-400">${getCartTotal().toFixed(2)}</span>
-              </div>
-
-              {checkoutError && (
-                <div className="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-300">
-                  {checkoutError}
-                </div>
-              )}
-
-              <button
-                onClick={handleCheckout}
-                disabled={isLibraryLoading}
-                className="mb-3 w-full rounded-lg bg-orange-600 py-3 font-medium transition-colors hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                {isLibraryLoading ? "Updating Library..." : "Proceed to Checkout"}
-              </button>
-
-              <button
-                onClick={clearCart}
-                className="w-full rounded-lg bg-slate-800 py-3 font-medium transition-colors hover:bg-slate-700"
-              >
-                Clear Cart
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+        </div>
+    );
 }

@@ -15,6 +15,8 @@ export function Store() {
   const user = useStoredUser();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
 
 
   const featuredGame = [...games].sort((a, b) => (b.rating || 0) - (a.rating || 0))[0];
@@ -51,12 +53,13 @@ export function Store() {
     const matchesQuickFilter =
       activeFilter === "all" ||
       (activeFilter === "sale" && !!game.originalPrice) ||
-      (activeFilter === "new" && isNewRelease(game));
+      (activeFilter === "new" &&
+        game.tags.some((tag) => tag.toLowerCase() === "new"));
 
-    return (
-      matchesSearch &&
-      matchesQuickFilter
-    );
+    const matchesMinPrice = minPrice === "" || game.price >= Number(minPrice);
+    const matchesMaxPrice = maxPrice === "" || game.price <= Number(maxPrice);
+
+    return matchesSearch && matchesFilter && matchesMinPrice && matchesMaxPrice;
   });
 
   return (
@@ -172,83 +175,130 @@ export function Store() {
                         ? "bg-slate-700 hover:bg-slate-600"
                         : "bg-orange-600 hover:bg-orange-700"
                     }`}
-                  >
-                    {isGameOwned(featuredGame.id)
-                      ? "In Library"
-                      : `Buy Now - $${featuredGame.price.toFixed(2)}`}
-                  </button>
-                  <button
-                    onClick={() => navigate(`/game/${featuredGame.id}`)}
-                    className="rounded-lg bg-slate-800 px-8 py-3 transition-colors hover:bg-slate-700"
-                  >
-                    Learn More
-                  </button>
-                </div>
+                >
+                  {isGameOwned(games[5].id)
+                    ? "In Library"
+                    : `Buy Now - $${games[5].price}`}
+                </button>
+                <button
+                  onClick={() => navigate(`/game/${games[5].id}`)}
+                  className="px-8 py-3 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors"
+                >
+                  Learn More
+                </button>
               </div>
             </div>
           </div>
-        </section>
-      ) : (
-        <section className="border-b border-slate-900 bg-slate-950 px-4 py-24 text-center">
-          <h2 className="text-4xl font-bold">Citrus Store</h2>
-          <p className="mt-3 text-slate-400">Game data will appear here once the catalog loads.</p>
-        </section>
-      )}
+        </div>
+      </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-12">
-        <div className="mb-8 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div>
+      <section className="max-w-7xl mx-auto px-4 py-12">
+        <div className="flex flex-col gap-4 mb-8">
+          <div className="flex items-center justify-between flex-wrap gap-3">
             <h3 className="text-3xl font-bold">Featured Games</h3>
-            <p className="mt-2 text-slate-400">
-              Filter by genre, tag, and price to narrow the catalog.
-            </p>
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => setActiveFilter("all")}
+                className={`px-4 py-2 rounded-xl transition-colors text-sm ${activeFilter === "all"
+                  ? "bg-slate-800 text-white"
+                  : "bg-slate-900 hover:bg-slate-800 text-slate-400"
+                  }`}
+              >
+                All
+              </button>
+
+              <button
+                onClick={() => setActiveFilter("sale")}
+                className={`px-4 py-2 rounded-xl transition-colors text-sm ${activeFilter === "sale"
+                  ? "bg-slate-800 text-white"
+                  : "bg-slate-900 hover:bg-slate-800 text-slate-400"
+                  }`}
+              >
+                On Sale
+              </button>
+
+              <button
+                onClick={() => setActiveFilter("new")}
+                className={`px-4 py-2 rounded-xl transition-colors text-sm ${activeFilter === "new"
+                  ? "bg-slate-800 text-white"
+                  : "bg-slate-900 hover:bg-slate-800 text-slate-400"
+                  }`}
+              >
+                New
+              </button>
+            </div>
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            {[
-              { value: "all", label: "All" },
-              { value: "sale", label: "On Sale" },
-              { value: "new", label: "New" },
-            ].map((filter) => (
-              <button
-                key={filter.value}
-                onClick={() => setActiveFilter(filter.value)}
-                className={`rounded-lg px-4 py-2 text-sm transition-colors ${
-                  activeFilter === filter.value
-                    ? "bg-slate-800 text-white"
-                    : "bg-slate-900 text-slate-400 hover:bg-slate-800"
-                }`}
-              >
-                {filter.label}
-              </button>
-            ))}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="text-sm font-medium text-slate-300 mr-1">Price</div>
+
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">
+                $
+              </span>
+              <input
+                type="number"
+                min="0"
+                value={minPrice}
+                onChange={(e) => setMinPrice(e.target.value)}
+                placeholder="Min"
+                className="bg-slate-900 border border-slate-700 rounded-xl pl-8 pr-4 py-2.5 text-sm w-28 focus:outline-none focus:border-orange-500 transition-colors"
+              />
+            </div>
+
+            <span className="text-slate-500 text-sm">to</span>
+
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">
+                $
+              </span>
+              <input
+                type="number"
+                min="0"
+                value={maxPrice}
+                onChange={(e) => setMaxPrice(e.target.value)}
+                placeholder="Max"
+                className="bg-slate-900 border border-slate-700 rounded-xl pl-8 pr-4 py-2.5 text-sm w-28 focus:outline-none focus:border-orange-500 transition-colors"
+              />
+            </div>
+
+            <button
+              onClick={() => {
+                setMinPrice("");
+                setMaxPrice("");
+              }}
+              className="px-4 py-2.5 bg-slate-900 border border-slate-700 hover:bg-slate-800 rounded-xl transition-colors text-sm text-slate-300"
+            >
+              Clear
+            </button>
           </div>
         </div>
 
-        {error ? (
-          <div className="rounded-2xl border border-red-500/40 bg-red-500/10 p-6 text-red-300">
-            {error}
-          </div>
-        ) : isLoading ? (
-          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 text-slate-300">
-            Loading games...
-          </div>
-        ) : filteredGames.length === 0 ? (
-          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-10 text-center">
-            <h4 className="text-2xl font-semibold">No games match these filters</h4>
-            <p className="mt-3 text-slate-400">
-              Try a different genre, tag, or price range.
-            </p>
-          </div>
-        ) : (
-          <>
-            <p className="mb-5 text-sm text-slate-400">
-              Showing {filteredGames.length} {filteredGames.length === 1 ? "game" : "games"}
-            </p>
-
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {filteredGames.map((game) => {
-                const discount = getGameDiscountPercentage(game);
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredGames.map((game) => (
+            <div
+              key={game.id}
+              className="bg-slate-900 rounded-xl overflow-hidden hover:transform hover:scale-105 transition-all duration-300 border border-slate-800 hover:border-orange-500/50"
+            >
+              <div className="relative h-48 overflow-hidden">
+                <img
+                  src={game.imageUrl}
+                  alt={game.title}
+                  className="w-full h-full object-cover"
+                />
+                {game.originalPrice && (
+                  <div className="absolute top-2 right-2 bg-orange-600 px-2 py-1 rounded flex items-center gap-1">
+                    <Tag className="w-3 h-3" />
+                    <span className="text-xs">
+                      {Math.round(
+                        ((game.originalPrice - game.price) / game.originalPrice) * 100
+                      )}
+                      % OFF
+                    </span>
+                  </div>
+                )}
+              </div>
 
                 return (
                   <div
@@ -332,45 +382,9 @@ export function Store() {
         )}
       </section>
 
-      <footer className="mt-20 border-t border-slate-800">
-        <div className="mx-auto max-w-7xl px-4 py-8">
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
-            <div>
-              <h5 className="mb-4 font-semibold">About</h5>
-              <ul className="space-y-2 text-sm text-slate-400">
-                <li><a href="#" className="transition-colors hover:text-white">About Us</a></li>
-                <li><a href="#" className="transition-colors hover:text-white">Careers</a></li>
-                <li><a href="#" className="transition-colors hover:text-white">Press</a></li>
-              </ul>
-            </div>
-            <div>
-              <h5 className="mb-4 font-semibold">Support</h5>
-              <ul className="space-y-2 text-sm text-slate-400">
-                <li><a href="#" className="transition-colors hover:text-white">Help Center</a></li>
-                <li><a href="#" className="transition-colors hover:text-white">Contact Us</a></li>
-                <li><a href="#" className="transition-colors hover:text-white">Forums</a></li>
-              </ul>
-            </div>
-            <div>
-              <h5 className="mb-4 font-semibold">Legal</h5>
-              <ul className="space-y-2 text-sm text-slate-400">
-                <li><a href="#" className="transition-colors hover:text-white">Terms of Service</a></li>
-                <li><a href="#" className="transition-colors hover:text-white">Privacy Policy</a></li>
-                <li><a href="#" className="transition-colors hover:text-white">Cookies</a></li>
-              </ul>
-            </div>
-            <div>
-              <h5 className="mb-4 font-semibold">Community</h5>
-              <ul className="space-y-2 text-sm text-slate-400">
-                <li><a href="#" className="transition-colors hover:text-white">Discord</a></li>
-                <li><a href="#" className="transition-colors hover:text-white">Twitter</a></li>
-                <li><a href="#" className="transition-colors hover:text-white">Reddit</a></li>
-              </ul>
-            </div>
-          </div>
-          <div className="mt-8 border-t border-slate-800 pt-8 text-center text-sm text-slate-500">
-            © 2026 Citrus. All rights reserved.
-          </div>
+      <footer className="border-t border-slate-800 mt-20">
+        <div className="max-w-7xl mx-auto px-4 py-8 text-center text-sm text-slate-500">
+          © 2026 Citrus. All rights reserved.
         </div>
       </footer>
     </div>
